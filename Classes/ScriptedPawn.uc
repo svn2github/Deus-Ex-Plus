@@ -3011,6 +3011,10 @@ function EHitLocation HandleDamage(int actualDamage, Vector hitLocation, Vector 
 
 	if (actualDamage > 0)
 	{
+		//== Y|y: Kinda hacky, but we don't want to actually damage invincible pawns, just play the animations
+		if(bInvincible)
+			actualDamage = 0;
+
 		if (offset.z > headOffsetZ)		// head
 		{
 			// narrow the head region
@@ -13781,7 +13785,28 @@ Begin:
 
 state Dying
 {
-	ignores SeePlayer, EnemyNotVisible, HearNoise, KilledBy, Trigger, Bump, HitWall, HeadZoneChange, FootZoneChange, ZoneChange, Falling, WarnTarget, Died, Timer, TakeDamage;
+	ignores SeePlayer, EnemyNotVisible, HearNoise, KilledBy, Trigger, Bump, HitWall, HeadZoneChange, FootZoneChange, Falling, WarnTarget, Died, Timer, TakeDamage;  // Y|y: removed ZoneChange
+
+	//== Y|y: Total HACK, but the WaitForLanding() function doesn't check for water, so we have to force the carcass spawn
+	function ZoneChange(ZoneInfo newZone)
+	{	
+		if (newZone.bWaterZone)
+		{
+			ExtinguishFire();
+			MoveFallingBody();
+		
+			DesiredRotation.Pitch = 0;
+			DesiredRotation.Roll  = 0;
+		
+			SetWeapon(None);
+		
+			bHidden = True;
+		
+			Acceleration = vect(0,0,0);
+			SpawnCarcass();
+			Destroy();
+		}
+	}
 
 	event Landed(vector HitNormal)
 	{

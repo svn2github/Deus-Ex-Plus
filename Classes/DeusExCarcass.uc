@@ -387,6 +387,15 @@ function Frob(Actor Frobber, Inventory frobWith)
 		if (Inventory != None)
 		{
 
+			//== Y|y: If by some chance we get items that belong to the player, skip them and move the Inventory
+			//==  variable to something
+			while(Inventory.Owner == Frobber)
+			{
+				Inventory = Inventory.Inventory;
+				if(Inventory == None)
+					break;
+			}
+
 			item = Inventory;
 			startItem = item;
 
@@ -394,7 +403,32 @@ function Frob(Actor Frobber, Inventory frobWith)
 			{
 //				log("===>DeusExCarcass:item="$item );
 
+				//== Y|y: and now some stuff to make sure we don't wander into player inventory AGAIN
+				if(item == None)
+					break;
+
+				while(item.Owner == Frobber)
+				{
+					item = item.Inventory;
+					if(item == None)
+						break;
+				}
+
+				if(item == None)
+					break;
+
 				nextItem = item.Inventory;
+
+				if(nextItem != None)
+				{
+					while(nextItem.Owner == Frobber)
+					{
+						nextItem = nextItem.Inventory;
+						item.Inventory = nextItem; //== Relink to the appropriate, un-player-owned item
+						if(nextItem == None)
+							break;
+					}
+				}
 
 				bPickedItemUp = False;
 

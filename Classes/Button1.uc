@@ -197,6 +197,7 @@ function Timer()
 	PlaySound(buttonSound2, SLOT_None);
 	SetSkin(ButtonType, bLit);
 	isPressed = False;
+	bUnlit = False;
 }
 
 function Frob(Actor Frobber, Inventory frobWith)
@@ -206,6 +207,7 @@ function Frob(Actor Frobber, Inventory frobWith)
 		isPressed = True;
 		PlaySound(buttonSound1, SLOT_None);
 		SetSkin(ButtonType, !bLit);
+		bUnlit = True;
 		if (!bWaitForEvent)
 			SetTimer(buttonLitTime, False);
 

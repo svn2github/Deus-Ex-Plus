@@ -15,6 +15,12 @@ function FirstFrame()
 	local ScriptedPawn pawn;
 	local SandraRenton Sandra;
 
+	if(localURL == "12_VANDENBERG_TUNNELS")
+	{
+		dxinfo.startupMessage[0] = "Maintenance Tunnels";
+		dxinfo.startupMessage[1] = "Vandenberg Airforce Base";
+	}
+
 	Super.FirstFrame();
 
 	if (localURL == "12_VANDENBERG_CMD")
@@ -143,7 +149,18 @@ function Timer()
 				earth.bHidden = True;
 
 			foreach AllActors(class'BobPage', Bob)
+			{
 				Bob.EnterWorld();
+				//== Y|y: make him not afraid or what have you
+				Bob.bLookingForEnemy = false;
+				Bob.bLookingForLoudNoise = false;
+				Bob.bLookingForAlarm = false;
+				Bob.bLookingForDistress = false;
+				Bob.bLookingForProjectiles = false;
+				Bob.bLookingForShot = false;
+				Bob.bLookingForInjury = false;
+				Bob.bLookingForIndirectInjury = false;
+			}
 
 			flags.SetBool('MS_M12PageAppeared', True,, 14);
 		}

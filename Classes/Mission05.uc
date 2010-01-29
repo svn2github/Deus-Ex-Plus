@@ -49,6 +49,18 @@ function FirstFrame()
 					T.Destroy();
 		}
 
+		//== There's a data cube that likes to fall through the level
+		//==  let's spawn a new copy, only this time inside the level boundaries
+		//==  Worst case scenario is there's a datacube on top of another
+		if(!flags.GetBool('M05_Datacube_Replaced'))
+		{
+			dCube = spawn(class'DataCube', None,, vect(-279.169556,432.570007,-100.000000));
+			dCube.textTag = '05_Datacube02';
+			dCube.textPackage = "DeusExText";
+
+			flags.SetBool('M05_Datacube_Replaced',True);
+		}
+
 		// remove the player's inventory and put it in a room
 		// also, heal the player up to 50% of his total health
 		if (!flags.GetBool('MS_InventoryRemoved'))
@@ -60,6 +72,11 @@ function FirstFrame()
 			Player.HealthArmLeft =  Max(50, Player.HealthArmLeft);
 			Player.HealthArmRight =  Max(50, Player.HealthArmRight);
 			Player.GenerateTotalHealth();
+
+			//== Y|y: There is an odd glitch with laser sights which can generate a "ghost" laser
+			//==  so we need to force the laser off
+			if(DeusExWeapon(Player.inHand) != None)
+				DeusExWeapon(Player.inHand).LaserOff();
 
 			if (Player.Inventory != None)
 			{
@@ -80,7 +97,7 @@ function FirstFrame()
 						item.DropFrom(SP.Location);
 
 						// restore any ammo amounts for a weapon to default
-						if (item.IsA('Weapon') && (Weapon(item).AmmoType != None))
+						if (item.IsA('Weapon') && (Weapon(item).AmmoType != None) && !item.IsA('WeaponLAM') && !item.IsA('WeaponGasGrenade') && !item.IsA('WeaponEMPGrenade') && !item.IsA('WeaponNanoVirusGrenade))
 							Weapon(item).PickupAmmoCount = Weapon(item).Default.PickupAmmoCount;
 					}
 					
@@ -142,6 +159,7 @@ function Timer()
 	local AnnaNavarre Anna;
 	local WaltonSimons Walton;
 	local DeusExMover M;
+	local AllianceTrigger altrig;
 
 	Super.Timer();
 
@@ -230,6 +248,16 @@ function Timer()
 		{
 			Player.StartDataLinkTransmission("DL_Paul");
 			flags.SetBool('MS_DL_Played', True,, 6);
+		}
+
+		//== Once we modify the bot we don't want it to suddenly hate us if we break a window
+		if(flags.GetBool('botmodified') && !flags.GetBool('M05_BotAlliance_Fixed'))
+		{
+			foreach AllActors(Class'AllianceTrigger', altrig, 'botorders')
+			{
+				altrig.Destroy();
+				flags.SetBool('M05_BotAlliance_Fixed',True);
+			}
 		}
 	}
 }

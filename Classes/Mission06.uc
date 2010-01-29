@@ -23,6 +23,9 @@ function FirstFrame()
 	local BookOpen book;
 	local float rnd;
 	local Keypad3 pad;
+	local AllianceTrigger altrig;
+	local MJ12Troop mjtroop;
+	local Mover thecase;
 
 	Super.FirstFrame();
 
@@ -32,6 +35,31 @@ function FirstFrame()
 		{
 			foreach AllActors(class'MJ12Commando', commando)
 				commando.EnterWorld();
+		}
+	}
+	else if (localURL == "06_HONGKONG_WANCHAI_STREET")
+	{
+		if(!flags.GetBool('MJ12_Troops_Silent'))
+		{
+			foreach AllActors(class'MJ12Troop', mjtroop)
+			{
+				mjtroop.bPlayIdle = False;
+			}
+			flags.SetBool('MJ12_Troops_Silent', True,, 8);
+		}
+
+		if(!flags.GetBool('DisplayCase_Moveable'))
+		{
+			foreach AllActors(class'Mover', thecase, 'Dispalycase')
+			{
+				if(VSize(thecase.KeyPos[1] - thecase.KeyPos[0]) <= 4)
+				{
+					thecase.KeyPos[1].Z = -136.000000;
+					flags.SetBool('DisplayCase_WasUnMoveable',True); //== For debug purposes
+				}
+
+				flags.SetBool('DisplayCase_Moveable',True);
+			}
 		}
 	}
 	else if (localURL == "06_HONGKONG_WANCHAI_CANAL")
@@ -149,6 +177,21 @@ function FirstFrame()
 			}
 		}
 	}
+	else if (localURL == "06_HONGKONG_STORAGE")
+	{
+		if (!flags.GetBool('Keypad_Deactivator_Placed'))
+		{
+			ftrig = spawn(Class'FlagTrigger', None,, vect(54.944206, 671.900024, -728.685852));
+			if(ftrig != None)
+			{
+				ftrig.SetCollision(false, false, false);
+				ftrig.Tag = 'Self_Destruct';
+				ftrig.bTrigger = false;
+				ftrig.flagName = 'Deactivate_Keypad';
+				flags.SetBool('Keypad_Deactivator_Placed', True);
+			}
+		}
+	}
 	else if (localURL == "06_HONGKONG_WANCHAI_MARKET")
 	{
 		// prepare for the ceremony
@@ -169,6 +212,17 @@ function FirstFrame()
 			}
 
 			flags.SetBool('CeremonyReadyToBegin', True,, 8);
+		}
+
+		//== Disable the Alliance triggers once you're a-ok with Gordon Quick
+		if(flags.GetBool('QuickLetPlayerIn') && !flags.GetBool('M06_LumTriggersDisabled'))
+		{
+			foreach AllActors(class'AllianceTrigger', altrig)
+			{
+				if(altrig.Tag == 'LumpathPissed')
+					altrig.Event = '';
+			}
+			flags.SetBool('M06_LumTriggersDisabled',True,, 8);
 		}
 
 		// remove the secretary
@@ -291,6 +345,12 @@ function FirstFrame()
 
 function PreTravel()
 {
+	//== Another interesting glitch: you can kill Bob Page after he
+	//==  talks to Maggie Chow, just as they walk by a microscopic
+	//==  crack between the window and the frame
+	if(flags.GetBool('BobPage_Dead'))
+		flags.SetBool('BobPage_Dead', False,, 8);
+
 	Super.PreTravel();
 }
 
@@ -604,6 +664,21 @@ function Timer()
 					M.bBreakable = True;
 
 			flags.SetBool('MS_ReadyAUC', True,, 8);
+		}
+
+		if(flags.GetBool('Deactivate_Keypad'))
+		{
+			foreach AllActors(class'Keypad1', pad)
+			{
+				if(pad.Event == 'Self_Destruct')
+				{
+					pad.Event = '';
+					pad.validCode = "XXX";
+					pad.bHackable = False;
+					pad.hackStrength = 1.0;
+					flags.SetBool('Deactivate_Keypad', False);
+				}
+			}
 		}
 	}
 	else if (localURL == "06_HONGKONG_WANCHAI_CANAL")

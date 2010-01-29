@@ -699,6 +699,7 @@ event TravelPostAccept()
 	RestoreScopeView();
 
 	// make sure the mission script has been spawned correctly
+	// Y|y: And if we can't spawn the one it wants, spawn a generic one
 	if (info != None)
 	{
 		bScriptRunning = False;
@@ -706,7 +707,51 @@ event TravelPostAccept()
 			bScriptRunning = True;
 
 		if (!bScriptRunning)
-			info.SpawnScript();
+		{
+			if(info.Script != None)
+			{
+				info.SpawnScript();
+
+				foreach AllActors(class'MissionScript', scr)
+					bScriptRunning = True;
+
+				//== Clearly, something was coded badly here
+				if(!bScriptRunning)
+				{
+					log("Mission Script reference " $ info.Script $ " is incorrect or invalid, removing...");
+					info.Script = None;
+				}
+			}
+
+			if(info.Script == None)
+			{
+				if(info.missionNumber < 10)
+					misstr = "0"$info.missionNumber;
+				else
+					misstr = String(info.missionNumber);
+
+				log("No Mission Script specified, attempting to load default");
+
+				info.Script = class<MissionScript>(DynamicLoadObject("DeusEx.Mission"$misstr,class'Class', True));
+
+				if(info.Script == None)
+				{
+					log("No existing Mission Script found for DeusEx.Mission" $ misstr $", loading parent Mission Script class.");
+					info.Script = class<MissionScript>(DynamicLoadObject("DeusEx.MissionScript",class'Class'));
+				}
+			}
+
+			if(!bScriptRunning)
+			{
+				if(info.Script != None)
+					info.SpawnScript();
+				else
+				{
+					log("EPIC FAIL!  Something is REALLY f%$#ed here because we can't load the base MissionScript class.  Manually removing the PlayerTraveling flag so controls work.");
+					FlagBase.DeleteFlag('PlayerTraveling', FLAG_Bool);
+				}
+			}
+		}
 	}
 
 	// make sure the player's eye height is correct
@@ -1374,6 +1419,7 @@ exec function PlayMusicWindow()
 
 // ----------------------------------------------------------------------
 // UpdateDynamicMusic()
+//  Y|y: updated to process "backup" song specification method (i.e. the NYC 08 fix)
 //
 // Pattern definitions:
 //   0 - Ambient 1
@@ -1388,11 +1434,46 @@ function UpdateDynamicMusic(float deltaTime)
 {
 	local bool bCombat;
 	local ScriptedPawn npc;
-   local Pawn CurPawn;
+	local Pawn CurPawn;
 	local DeusExLevelInfo info;
+	local Music LevelSong;
+	local String SongString;
+	local byte LevelSongSection;
+	local EMusicMode newMusicMode;
 
+	//== In case any of the mission song info gets all f%$#ed up (like NYC in mission 8)
 	if (Level.Song == None)
-		return;
+	{
+		//== If we have music playing we may as well just stick with that
+		LevelSong = Song;
+
+		if(LevelSong == None || LevelSong.Class.Name == '')
+		{
+			SongString = FlagBase.GetName('Song_Name1') $"."$ FlagBase.GetName('Song_Name2');
+
+			if(SongString != "None.None")
+			{
+				log("UpdateDynamicMusic()============> No music specified in map, loading from flags.  Attempted load name is "$ SongString);
+
+				LevelSong = Music(DynamicLoadObject(SongString, class'Music'));
+
+				//== We'll just assume this is the appropriate song type.  Later updates will catch us if we're wrong
+				newMusicMode = MUS_Ambient;
+
+				//== Instant transition
+				ClientSetMusic(LevelSong, newMusicMode, 255, MTRAN_Instant);
+				return;
+			}
+		}
+
+		if(LevelSong == None)
+			return;
+	}
+	else
+	{
+		LevelSongSection = Level.SongSection;
+		LevelSong = Level.Song;
+	}
 
    // DEUS_EX AMSD In singleplayer, do the old thing.
    // In multiplayer, we can come out of dying.
@@ -1423,7 +1504,7 @@ function UpdateDynamicMusic(float deltaTime)
 
 		if (musicMode != MUS_Outro)
 		{
-			ClientSetMusic(Level.Song, 5, 255, MTRAN_FastFade);
+			ClientSetMusic(LevelSong, 5, 255, MTRAN_FastFade);
 			musicMode = MUS_Outro;
 		}
 	}
@@ -1437,7 +1518,7 @@ function UpdateDynamicMusic(float deltaTime)
 			else
 				savedSection = 255;
 
-			ClientSetMusic(Level.Song, 4, 255, MTRAN_Fade);
+			ClientSetMusic(LevelSong, 4, 255, MTRAN_Fade);
 			musicMode = MUS_Conversation;
 		}
 	}
@@ -1445,7 +1526,7 @@ function UpdateDynamicMusic(float deltaTime)
 	{
 		if (musicMode != MUS_Dying)
 		{
-			ClientSetMusic(Level.Song, 1, 255, MTRAN_Fade);
+			ClientSetMusic(LevelSong, 1, 255, MTRAN_Fade);
 			musicMode = MUS_Dying;
 		}
 	}
@@ -1475,8 +1556,6 @@ function UpdateDynamicMusic(float deltaTime)
 
 			if (bCombat)
 			{
-				musicChangeTimer = 0.0;
-
 				if (musicMode != MUS_Combat)
 				{
 					// save our place in the ambient track
@@ -1485,9 +1564,14 @@ function UpdateDynamicMusic(float deltaTime)
 					else
 						savedSection = 255;
 
-					ClientSetMusic(Level.Song, 3, 255, MTRAN_FastFade);
+					if(musicChangeTimer >= 20.0)
+						ClientSetMusic(LevelSong, 3, 255, MTRAN_Instant);
+					else
+						ClientSetMusic(LevelSong, 3, 255, MTRAN_FastFade);
 					musicMode = MUS_Combat;
 				}
+
+				musicChangeTimer = 0.0;
 			}
 			else if (musicMode != MUS_Ambient)
 			{
@@ -1496,13 +1580,15 @@ function UpdateDynamicMusic(float deltaTime)
 				{
 					// use the default ambient section for this map
 					if (savedSection == 255)
-						savedSection = Level.SongSection;
+						savedSection = LevelSongSection;
 
+					if(musicChangeTimer >= 20.0)
+						ClientSetMusic(LevelSong, savedSection, 255, MTRAN_Instant);
 					// fade slower for combat transitions
-					if (musicMode == MUS_Combat)
-						ClientSetMusic(Level.Song, savedSection, 255, MTRAN_SlowFade);
+					else if (musicMode == MUS_Combat)
+						ClientSetMusic(LevelSong, savedSection, 255, MTRAN_SlowFade);
 					else
-						ClientSetMusic(Level.Song, savedSection, 255, MTRAN_Fade);
+						ClientSetMusic(LevelSong, savedSection, 255, MTRAN_Fade);
 
 					savedSection = 255;
 					musicMode = MUS_Ambient;
@@ -4290,11 +4376,13 @@ simulated event RenderOverlays( canvas Canvas )
 // RestrictInput()
 //
 // Are we in a state which doesn't allow certain exec functions?
+// Y|y: added Traveling (mission start before MissionScript is spawned)
+//      This is what fixes the MJ12 Lab Confiscate "Drop" exploit
 // ----------------------------------------------------------------------
 
 function bool RestrictInput()
 {
-	if (IsInState('Interpolating') || IsInState('Dying') || IsInState('Paralyzed'))
+	if (IsInState('Interpolating') || IsInState('Dying') || IsInState('Paralyzed') || (FlagBase.GetBool('PlayerTraveling') && !bCheatsEnabled))
 		return True;
 
 	return False;
@@ -4975,7 +5063,23 @@ function UpdateInHand()
 				if (inHand.IsA('SkilledTool'))
 					SkilledTool(inHand).BringUp();
 				else if (inHand.IsA('DeusExWeapon'))
-					SwitchWeapon(DeusExWeapon(inHand).InventoryGroup);
+				{
+					//== Bad, bad code.  Doesn't let us use multiple copies of the same weapon
+					//SwitchWeapon(DeusExWeapon(inHand).InventoryGroup);
+
+					//== Y|y: Because SwitchWeapon is a horrible function, we'll just do this manually
+					if ( Weapon == None )
+					{
+						PendingWeapon = Weapon(inHand);
+						ChangedWeapon();
+					}
+					else if ( Weapon != Weapon(inHand) )
+					{
+						PendingWeapon = Weapon(inHand);
+						if ( !Weapon.PutDown() )
+							PendingWeapon = None;
+					}
+				}
 			}
 		}
 	}
@@ -4997,7 +5101,23 @@ function UpdateInHand()
 			else if (inHand.IsA('DeusExWeapon'))
 			{
 				if (inHand.IsInState('DownWeapon') && (Weapon == None))
-					SwitchWeapon(DeusExWeapon(inHand).InventoryGroup);
+				{
+					//== Bad, bad code.  Doesn't let us use multiple copies of the same weapon
+					//SwitchWeapon(DeusExWeapon(inHand).InventoryGroup);
+
+					//== Y|y: Same here.  Just do the relevant stuff from SwitchWeapon and skip the rest
+					if ( Weapon == None )
+					{
+						PendingWeapon = Weapon(inHand);
+						ChangedWeapon();
+					}
+					else if ( Weapon != Weapon(inHand) )
+					{
+						PendingWeapon = Weapon(inHand);
+						if ( !Weapon.PutDown() )
+							PendingWeapon = None;
+					}
+				}
 			}
 		}
 
@@ -10088,6 +10208,12 @@ function SkillPointsAdd(int numPoints)
 			ClientMessage(Sprintf(SkillPointsAward, numPoints));
 			DeusExRootWindow(rootWindow).hud.msgLog.PlayLogSound(Sound'LogSkillPoints');
 		}
+
+		//== Y|y: Prevent any potential crashes due to skillpoint awards
+		if(SkillPointsAvail > 115900)
+			SkillPointsAvail = 115900;
+		if(SkillPointsTotal > 115900)
+			SkillPointsTotal = 115900;
 	}
 }
 

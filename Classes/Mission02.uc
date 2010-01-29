@@ -66,6 +66,21 @@ function FirstFrame()
 			}
 		}
 	}
+	else if (localURL == "02_NYC_UNDERGROUND")
+	{
+		//== Fix the duration that the FordSchickRescued flag is relevant
+		if(!flags.GetBool('M02_Rescue_Flag_Fixed'))
+		{
+			foreach AllActors(class'FlagTrigger', ftrig)
+			{
+				if(ftrig.FlagName == 'FordSchickRescued')
+				{
+					ftrig.flagExpiration = 9;
+					flags.SetBool('M02_Rescue_Flag_Fixed',True);
+				}
+			}
+		}
+	}
 	else if (localURL == "02_NYC_BAR")
 	{
 		// unhide Sandra if you've talked to her already
@@ -115,12 +130,34 @@ function PreTravel()
 	}
 	else if (localURL == "02_NYC_UNDERGROUND")
 	{
+		foreach allActors(class'FordSchick', ford)
+		{
+			flags.SetBool('FordSchick_Dead', False);
+
+			if(flags.GetBool('ShickThankedPlayer'))//== If ford has thanked us, he's rescued
+				flags.SetBool('FordSchickRescued', True,, 9);
+		}
+
 		// if you leave the level with Ford Schick, set a flag
 		if (flags.GetBool('MS_FordFollowing') &&
 			!flags.GetBool('FordSchick_Dead'))
 		{
 			flags.SetBool('FordSchickRescued', True,, 9);
 		}
+		//== If nobody's guarding Ford we can assume he won't die
+		else if(!flags.GetBool('FordSchick_Dead'))
+		{
+			count = 0;
+			foreach AllActors(Class'MJ12Troop', mj12)
+				count++;
+
+			if(count <= 0)
+				flags.SetBool('FordSchickRescued', True,, 9);
+		}
+
+		//== Make sure the flag duration is set long enough
+		if(flags.GetBool('FordSchickRescued'))
+			flags.SetBool('FordSchickRescued', True,, 9);
 	}
 
 	Super.PreTravel();
@@ -155,7 +192,8 @@ function Timer()
 	if (localURL == "02_NYC_BATTERYPARK")
 	{
 		// after terrorists are dead, set guards to wandering
-		if (!flags.GetBool('BatteryParkSlaughter'))
+		// Y|y: Fix so as to not erroneously tag you as a murderer
+		if (!flags.GetBool('BatteryParkSlaughter') && !flags.GetBool('CastleClintonCleared'))
 		{
 			count = 0;
 
@@ -163,15 +201,25 @@ function Timer()
 			foreach AllActors(class'Terrorist', T, 'ClintonTerrorist')
 				count++;
 
+			// one way or another, the castle has been cleared
+			if(count == 0)
+			{
+				// nothing to do here anymore, so wander
+				foreach AllActors(class'UNATCOTroop', guard, 'ClintonGuard')
+					guard.SetOrders('Wandering', '', True);
+
+				flags.SetBool('CastleClintonCleared', True,, 3);
+			}
+
 			// count the number of unconscious terrorists
 			foreach AllActors(class'TerroristCarcass', carc, 'ClintonTerrorist')
-				if (carc.itemName == "Unconscious")
+				if (carc.bNotDead || carc.KillerBindName != "JCDenton" || carc.itemName == "Unconscious")
 					count++;
 
-			// there are 5 total, player must have killed 2 or more, so
-			// check to see if there are fewer than 3 still alive or unconscious
-			if (count <= 3)
+			// if there are less than four, then the player killed at least two.  For shame.
+			if (count <= 3 && !flags.GetBool('BatteryParkSlaughter'))
 			{
+				// free up the guards so they can kill 'em
 				foreach AllActors(class'UNATCOTroop', guard, 'ClintonGuard')
 					guard.SetOrders('Wandering', '', True);
 

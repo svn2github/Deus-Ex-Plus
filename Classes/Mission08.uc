@@ -83,6 +83,21 @@ function Timer()
 	}
 	else if (localURL == "08_NYC_STREET")
 	{
+		//== Set the "backup" song variable here for the GOTY players who don't normally get music in this level
+		if(flags.GetName('Song_Name1') != 'NYCStreets2_Music' || flags.GetName('Song_Name2') != 'NYCStreets2_Music')
+		{
+			//== For the users that have issues with the music in this map, give the backup method something to work with
+			songname = DeusExRootWindow(Player.rootWindow).StringToName("NYCStreets2_Music");
+	
+			tname = DeusExRootWindow(Player.rootWindow).StringToName("Song_Name1");
+			flags.SetName(tname, songname);
+			flags.SetExpiration(tname, FLAG_Name, 9);
+	
+			tname = DeusExRootWindow(Player.rootWindow).StringToName("Song_Name2");
+			flags.SetName(tname, songname);
+			flags.SetExpiration(tname, FLAG_Name, 9);
+		}
+
 		// spawn reinforcements as cops are killed
 		if (!flags.GetBool('MS_UnhideTroop1'))
 		{
@@ -272,6 +287,20 @@ function Timer()
 				chopper.EnterWorld();
 
 			flags.SetBool('MS_Helicopter_Unhidden', True,, 9);
+		}
+	}
+	else if(localURL == "08_NYC_SMUG")
+	{
+		if(flags.getBool('FordSchickRescued'))
+		{
+			if(!flags.getBool('M08FordShick_Appeared'))
+			{
+				foreach AllActors(class'FordSchick', Ford)
+				{
+					Ford.EnterWorld();
+					flags.SetBool('M08FordSchick_Appeared', True,, 9);
+				}
+			}
 		}
 	}
 }

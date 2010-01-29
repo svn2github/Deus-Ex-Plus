@@ -11,7 +11,21 @@ class Mission11 expands MissionScript;
 
 function FirstFrame()
 {
+	local Mechanic mech;
+
 	Super.FirstFrame();
+
+	if (localURL == "11_PARIS_EVERETT")
+	{
+		if (!flags.GetBool('Ray_Neutral') && !flags.GetBool('Ray_Dead'))
+		{
+			foreach AllActors(class'Mechanic', mech)
+			{
+				mech.bLikesNeutral = False;
+				flags.SetBool('Ray_Neutral', True);
+			}
+		}
+	}
 }
 
 // ----------------------------------------------------------------------

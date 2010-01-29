@@ -96,7 +96,7 @@ function GetScreenResolutions()
 	local int resWidth;
 	local int choiceCount;
 	local string ParseString;
-	local string Resolutions[16];
+	local string Resolutions[48];
 	local string AvailableRes;
 	local string resString;
 	local int resNum;

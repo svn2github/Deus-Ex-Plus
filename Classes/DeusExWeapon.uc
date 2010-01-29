@@ -2842,23 +2842,23 @@ simulated function bool UpdateInfo(Object winObject)
 			str = FormatFloatString(Default.ReloadTime, 0.1) @ msgTimeUnit;
 	}
 
-	if (HasReloadMod())
+	if (HasReloadMod() || (GetWeaponSkill() < 0.0 && str != msgInfoNA))
 	{
-		str = str @ BuildPercentString(ModReloadTime);
-		str = str @ "=" @ FormatFloatString(ReloadTime, 0.1) @ msgTimeUnit;
+		str = str @ BuildPercentString(ModReloadTime + (GetWeaponSkill() * ReloadTime/Default.ReloadTime));
+		str = str @ "=" @ FormatFloatString(ReloadTime * (1.0 + GetWeaponSkill()), 0.1) @ msgTimeUnit;
 	}
 
-	winInfo.AddInfoItem(msgInfoReload, str, HasReloadMod());
+	winInfo.AddInfoItem(msgInfoReload, str, (HasReloadMod() || (GetWeaponSkill() < 0.0 && (Default.ReloadCount > 0 && !bHandToHand))));
 
 	// recoil
 	str = FormatFloatString(Default.recoilStrength, 0.01);
-	if (HasRecoilMod())
+	if (HasRecoilMod() || (GetWeaponSkill() < 0.0 && Default.recoilStrength > 0.0))
 	{
-		str = str @ BuildPercentString(ModRecoilStrength);
-		str = str @ "=" @ FormatFloatString(recoilStrength, 0.01);
+		str = str @ BuildPercentString(ModRecoilStrength + (GetWeaponSkill() * 2.0 * recoilStrength/Default.recoilStrength));
+		str = str @ "=" @ FormatFloatString(recoilStrength * (1.0 + (GetWeaponSkill() * 2.0)), 0.01);
 	}
 
-	winInfo.AddInfoItem(msgInfoRecoil, str, HasRecoilMod());
+	winInfo.AddInfoItem(msgInfoRecoil, str, (HasRecoilMod() || (GetWeaponSkill() < 0.0 && Default.recoilStrength > 0.0)));
 
 	// base accuracy (2.0 = 0%, 0.0 = 100%)
 	if ( Level.NetMode != NM_Standalone )
