@@ -2099,6 +2099,10 @@ simulated function SimGenerateBullet()
 			if ( AmmoType != None )
 				AmmoType.SimUseAmmo();
 
+			//== Y|y: Automatic weapons need to play the silenced firing sound more than once
+			if ( bHasSilencer )
+				PlayFiringSound();
+
 			if ( bInstantHit )
 				TraceFire(currentAccuracy);
 			else
@@ -2139,6 +2143,10 @@ function GenerateBullet()
 {
 	if (AmmoType.UseAmmo(1))
 	{
+		//== Y|y: Silenced, automatic weapons don't play enough bullet sounds
+		if(bHasSilencer)
+			PlayFiringSound();
+
 		if ( bInstantHit )
 			TraceFire(currentAccuracy);
 		else

@@ -3,6 +3,50 @@
 //=============================================================================
 class Candybar extends DeusExPickup;
 
+//== Y|y: add full support for the extra texture
+enum ESkinColor
+{
+	SC_Random,
+	SC_Honey,
+	SC_Monty
+}
+
+var() ESkinColor SkinColor;
+
+function PreBeginPlay()
+{
+	switch(SkinColor)
+	{
+		//== Randomize the skin if one hasn't been selected already
+		case SC_Random:
+			if(Rand(2) == 1 && (Skin == Texture'CandybarTex1' || Skin == None))
+				Skin = Texture'CandybarTex2';
+			break;
+
+		case SC_Honey:
+			Skin = Texture'CandybarTex1';
+			break;
+
+		case SC_Monty:
+			Skin = Texture'CandybarTex2';
+			break;
+	}
+		
+}
+
+function bool HandlePickupQuery(inventory Item)
+{
+	//== Use the Chunk-O-Honey skin for holding this in inventory
+	if(Super.HandlePickupQuery(Item))
+	{
+		Skin = Texture'CandybarTex1';
+		return True;
+	}
+
+	return False;
+}
+
+
 state Activated
 {
 	function Activate()

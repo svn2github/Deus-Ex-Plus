@@ -922,7 +922,12 @@ Begin:
 		PlaySpeech( ConEventSpeech(currentEvent).conSpeech.soundID, ConEventSpeech(currentEvent).Speaker ); 
 
 		// Add two seconds to the sound since there seems to be a slight lag
-		SetTimer( con.GetSpeechLength(ConEventSpeech(currentEvent).conSpeech.soundID), False );
+		//== Y|y: Only set a timer if this conversation is supposed to end automatically (e.g. Malkavian Mod)
+		if( con.GetSpeechLength(ConEventSpeech(currentEvent).conSpeech.soundID) > 0.0)
+			SetTimer( con.GetSpeechLength(ConEventSpeech(currentEvent).conSpeech.soundID), False );
+		//== Y|y: Barks, however, need to end automatically no matter what because we can't force them to end
+		else if( conWinThird == None ) //== OMG I CAN GET ON TEH BOTE!
+			SetTimer( FMax(lastSpeechTextLength * perCharDelay, minimumTextPause), False );
 	}
 
 	Goto('Idle');

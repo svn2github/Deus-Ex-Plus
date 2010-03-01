@@ -496,6 +496,8 @@ function EEventAction SetupEventCheckObject( ConEventCheckObject event, out Stri
 	local EEventAction nextAction;
 	local Name keyName;
 	local bool bHasObject;
+	local class<Inventory> checkthing;
+	local string seekname;
 
 	// Okay this is some HackyHack stuff here.  We want the ability to 
 	// check if the player has a particular nanokey.  Sooooooo.
@@ -506,9 +508,17 @@ function EEventAction SetupEventCheckObject( ConEventCheckObject event, out Stri
 		keyName    = player.rootWindow.StringToName(Right(event.ObjectName, Len(event.ObjectName) - 3));
 		bHasObject = ((player.KeyRing != None) && (player.KeyRing.HasKey(keyName)));
 	}
-	else 
+	else //== Y|y: Add suppport for custom transfers from non-DeusEx classes.  Code copy-pasted courtesy of DDL
 	{
-		bHasObject = (player.FindInventoryType(event.checkObject) != None);
+		//look for a fullstop, if not there, add deusex. to the beginning
+		if(instr(event.objectname, ".") == -1)
+			Seekname = "DeusEx." $ event.objectname;
+		else
+			Seekname = event.objectname;
+
+		checkthing = class<inventory>(DynamicLoadObject(seekname, class'Class')); //grabs a class incidence from the name
+
+		bHasObject = (player.FindInventoryType(checkthing) != None);
 	}
 
 	// Now branch appropriately
@@ -548,6 +558,8 @@ function EEventAction SetupEventTransferObject( ConEventTransferObject event, ou
 	local bool bSpawnedItem;
 	local bool bSplitItem;
 	local int itemsTransferred;
+	local class<Inventory> checkthing;
+	local string seekname;
 
 /*
 log("SetupEventTransferObject()------------------------------------------");
@@ -577,6 +589,33 @@ log("  event.toActor    = " $ event.toActor );
 		return nextAction;
 	}
 
+	//== Y|y: More support for custom transfers from non-DeusEx classes.  Code mostly by DDL
+
+	//look for a fullstop, if not there, add deusex. to the beginning
+	if(instr(event.objectname, ".") == -1)
+		seekname = "DeusEx." $ event.objectname;
+	else
+		seekname = event.objectname;
+
+	checkthing = class<inventory>(DynamicLoadObject(seekname, class'Class')); //grabs a class incidence from the name
+
+	if(checkthing == None) //oh noes!
+	{
+		log("SetupEventTransferObject(): Well that worked like crap.  Whatever " $ seekname $ " is, I can't load it up.");
+
+		//== Y|y: At this point we have nothing to lose, might as well try
+		checkthing = class<inventory>(DynamicLoadObject(event.objectname, class'Class', True));
+
+		if(checkthing == None)
+		{
+//			return nextAction; //assume fail, essentially
+			//== Y|y: Rather than giving up, let's just assume the old giveObject was the right choice
+			checkthing = event.giveObject;
+		}
+		else
+			log("SetupEventTransferObject(): Trying to load up " $ event.objectname $ " works though.  Consider recoding your conversation.");
+	}
+
 	// First, check to see if the giver actually has the object.  If not, then we'll
 	// fabricate it out of thin air.  (this is useful when we want to allow
 	// repeat visits to the same NPC so the player can restock on items in some
@@ -585,9 +624,9 @@ log("  event.toActor    = " $ event.toActor );
 	// Also check to see if the item already exists in the recipient's inventory
 
 	if (event.fromActor != None)
-		invItemFrom = Pawn(event.fromActor).FindInventoryType(event.giveObject);
+		invItemFrom = Pawn(event.fromActor).FindInventoryType(checkthing);
 
-	invItemTo   = Pawn(event.toActor).FindInventoryType(event.giveObject);
+	invItemTo   = Pawn(event.toActor).FindInventoryType(checkthing);
 
 //log("  invItemFrom = " $ invItemFrom);
 //log("  invItemTo   = " $ invItemTo);
@@ -598,7 +637,7 @@ log("  event.toActor    = " $ event.toActor );
 	// If the giver doesn't have the item then we must spawn a copy of it
 	if (invItemFrom == None)
 	{
-		invItemFrom = Spawn(event.giveObject);
+		invItemFrom = Spawn(checkthing); //== Y|y: Use the new variable
 		bSpawnedItem = True;
 	}
 
@@ -636,11 +675,18 @@ log("  event.toActor    = " $ event.toActor );
 		{
 			// If this is Ammo and the player already has it, make sure the player isn't
 			// already full of this ammo type! (UGH!)
+
+			//== Y|y: And now some trickery, for math purposes...
+			itemsTransferred = Ammo(invItemTo).AmmoAmount;
 			if (!Ammo(invItemTo).AddAmmo(Ammo(invItemFrom).AmmoAmount))
 			{
 				invItemFrom.Destroy();
 				return nextAction;
 			}
+
+			itemsTransferred = Ammo(invItemTo).AmmoAmount - itemsTransferred; //== Y|y: Subtract what we had from what we have and we will get the correct amount transferred
+
+			if(itemsTransferred <= 0) itemsTransferred = Ammo(invItemFrom).AmmoAmount; //== Y|y: ...but just in case....
 
 			// Destroy our From item
 			invItemFrom.Destroy();		
@@ -666,6 +712,9 @@ log("  event.toActor    = " $ event.toActor );
 						invItemFrom.Destroy();
 						return nextAction;
 					}
+
+					//== Y|y: Display the amount of ammo transferred properly
+					itemsTransferred = event.TransferCount;
 				}
 				else
 				{
@@ -735,7 +784,7 @@ log("  event.toActor    = " $ event.toActor );
 		    (DeusExPickup(invItemFrom).NumCopies > event.transferCount))
 		{
 			itemsTransferred = event.TransferCount;
-			invItemTo = Spawn(event.giveObject);
+			invItemTo = Spawn(checkthing); //== Y|y: Compatibility for custom transfers
 			invItemTo.GiveTo(Pawn(event.toActor));
 			DeusExPickup(invItemFrom).NumCopies -= event.transferCount;
 			bSplitItem   = True;
@@ -925,6 +974,11 @@ log("  event.transferCount = " $ event.transferCount);
 			itemsTransferred = 1;
 		else
 			itemsTransferred = 0;
+	}
+	//== Y|y: Track ammo counts correctly
+	else if(invItemTo.IsA('DeusExAmmo'))
+	{
+		itemsTransferred = Ammo(invItemTo).AmmoAmount;
 	}
 
 //log("  return itemsTransferred = " $ itemsTransferred);

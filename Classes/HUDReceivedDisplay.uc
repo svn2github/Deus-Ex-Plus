@@ -128,9 +128,54 @@ function bool ChildRequestedReconfiguration(window child)
 function AddItem(Inventory invItem, Int count)
 {
 	local HUDReceivedDisplayItem item;
+	local Window itemWindow, nextWindow;
+	local string labelText;
 
-	item = HUDReceivedDisplayItem(winTile.NewChild(Class'HUDReceivedDisplayItem'));
-	item.SetItem(invItem, count);
+	//== Y|y: A lot of fixing here.  First off, make sure there's something to add...
+	if(count <= 0)
+		return;
+
+	//== Y|y: ...and that it's a real something...
+	if(invItem == None || invItem.IsA('AmmoNone'))
+		return;
+
+	//== Y|y: ...then get the right ammo count, if it's ammo...
+	if(Ammo(invItem) != None)
+		if(Ammo(invItem).AmmoAmount > count)
+			count = Ammo(invItem).AmmoAmount;
+
+	//== Y|y: ...and start checking for duplicate items.
+	if(winTile != None)
+		itemWindow = winTile.GetTopChild();
+	while( itemWindow != None )
+	{
+		nextWindow = itemWindow.GetLowerSibling();
+		if(itemWindow.IsA('HudReceivedDisplayItem'))
+		{
+			//== Y|y: If this IS a duplicate item then we should just update the amount, rather than make a new entry
+			if(HudReceivedDisplayItem(itemWindow).itemClass == invItem.Class && invItem.Class != None)
+			{
+				labelText = invItem.beltDescription;
+				if(labelText == "")
+					labelText = invItem.Default.beltDescription;
+	
+				HudReceivedDisplayItem(itemWindow).itemCount += count;
+	
+				if(HudReceivedDisplayItem(itemWindow).itemCount > 1)
+					labelText = labelText $ " (" $ string(HudReceivedDisplayItem(itemWindow).itemCount) $ ")";
+	
+				if(HudReceivedDisplayItem(itemWindow).winLabel != None)
+					HudReceivedDisplayItem(itemWindow).winLabel.SetText(labelText);
+			}
+		}
+		itemWindow = nextWindow;
+	}
+
+	if(labelText == "")
+	{
+		item = HUDReceivedDisplayItem(winTile.NewChild(Class'HUDReceivedDisplayItem'));
+		item.SetItem(invItem, count);
+	}
 
 	displayTimer = 0.0;
 	Show();

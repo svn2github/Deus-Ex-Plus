@@ -5803,7 +5803,8 @@ function DropDecoration()
 					mult = 1.0;
 			}
 
-			if (IsLeaning())
+			//== Y|y: We shouldn't throw items due to being dropped whilst in a conversation, because that tends to kill or PO who we're conversing with
+			if (IsLeaning() || IsInState('Conversation'))
 				CarriedDecoration.Velocity = vect(0,0,0);
 			else
 				CarriedDecoration.Velocity = Vector(ViewRotation) * mult * 500 + vect(0,0,220) + 40 * VRand();

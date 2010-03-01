@@ -441,19 +441,19 @@ function Frob(Actor Frobber, Inventory frobWith)
 				}
 				else if ( (item.IsA('DeusExWeapon')) )
 				{
-               // Any weapons have their ammo set to a random number of rounds (1-4)
-               // unless it's a grenade, in which case we only want to dole out one.
-               // DEUS_EX AMSD In multiplayer, give everything away.
-               W = DeusExWeapon(item);
-               
-               // Grenades and LAMs always pickup 1
-               if (W.IsA('WeaponNanoVirusGrenade') || 
-                  W.IsA('WeaponGasGrenade') || 
-                  W.IsA('WeaponEMPGrenade') ||
-                  W.IsA('WeaponLAM'))
-                  W.PickupAmmoCount = 1;
-               else if (Level.NetMode == NM_Standalone)
-                  W.PickupAmmoCount = Rand(4) + 1;
+					// Any weapons have their ammo set to a random number of rounds (1-4)
+					// unless it's a grenade, in which case we only want to dole out one.
+					// DEUS_EX AMSD In multiplayer, give everything away.
+					W = DeusExWeapon(item);
+					
+					// Grenades and LAMs always pickup 1
+					if (W.IsA('WeaponNanoVirusGrenade') || 
+					  W.IsA('WeaponGasGrenade') || 
+					  W.IsA('WeaponEMPGrenade') ||
+					  W.IsA('WeaponLAM'))
+						W.PickupAmmoCount = 1;
+					else if (Level.NetMode == NM_Standalone) //== Y|y: CHANGE AMMO PICKUP AMOUNTS HERE
+						W.PickupAmmoCount = Rand(4) + 1;
 				}
 				
 				if (item != None)
@@ -506,22 +506,35 @@ function Frob(Actor Frobber, Inventory frobWith)
 							{
 								AmmoType = Ammo(player.FindInventoryType(Weapon(item).AmmoName));
 
-                        if ((AmmoType != None) && (AmmoType.AmmoAmount < AmmoType.MaxAmmo))
+								//== Y|y: Last-ditch effort in case the above somehow fails
+								if(AmmoType == None)
+									AmmoType = Ammo(Player.FindInventoryType(W.AmmoName));
+
+								//== Y|y: Check this first to prevent "Accessed None" spam
+								if(AmmoType != None)
 								{
-                           AmmoType.AddAmmo(Weapon(item).PickupAmmoCount);
-                           AddReceivedItem(player, AmmoType, Weapon(item).PickupAmmoCount);
-                           
-									// Update the ammo display on the object belt
-									player.UpdateAmmoBeltText(AmmoType);
+									if (AmmoType.AmmoAmount < AmmoType.MaxAmmo)
+									{
+										AmmoType.AddAmmo(Weapon(item).PickupAmmoCount);
 
-									// if this is an illegal ammo type, use the weapon name to print the message
-									if (AmmoType.PickupViewMesh == Mesh'TestBox')
-										P.ClientMessage(item.PickupMessage @ item.itemArticle @ item.itemName, 'Pickup');
-									else
-										P.ClientMessage(AmmoType.PickupMessage @ AmmoType.itemArticle @ AmmoType.itemName, 'Pickup');
-
-									// Mark it as 0 to prevent it from being added twice
-									Weapon(item).AmmoType.AmmoAmount = 0;
+										//== Y|y: If the ammo has no icon, use the weapon instead (e.g. Throwing Knives)
+										if(AmmoType.Icon != None)
+											AddReceivedItem(player, AmmoType, Weapon(item).PickupAmmoCount);
+										else
+											AddReceivedItem(player, item, Weapon(item).PickupAmmoCount);
+	                           
+										// Update the ammo display on the object belt
+										player.UpdateAmmoBeltText(AmmoType);
+	
+										// if this is an illegal ammo type, use the weapon name to print the message
+										if (AmmoType.PickupViewMesh == Mesh'TestBox')
+											P.ClientMessage(item.PickupMessage @ item.itemArticle @ item.itemName, 'Pickup');
+										else
+											P.ClientMessage(AmmoType.PickupMessage @ AmmoType.itemArticle @ AmmoType.itemName, 'Pickup');
+	
+										// Mark it as 0 to prevent it from being added twice
+										Weapon(item).AmmoType.AmmoAmount = 0;
+									}
 								}
 							}
 
@@ -595,18 +608,33 @@ function Frob(Actor Frobber, Inventory frobWith)
 								DeusExPlayer(P).FrobTarget = item;
 								if (DeusExPlayer(P).HandleItemPickup(Item) != False)
 								{
-                           DeleteInventory(item);
-
-                           // DEUS_EX AMSD Belt info isn't always getting cleaned up.  Clean it up.
-                           item.bInObjectBelt=False;
-                           item.BeltPos=-1;
+									DeleteInventory(item);
 									
-                           item.SpawnCopy(P);
+									// DEUS_EX AMSD Belt info isn't always getting cleaned up.  Clean it up.
+									item.bInObjectBelt=False;
+									item.BeltPos=-1;
+														
+									item.SpawnCopy(P);
 
 									// Show the item received in the ReceivedItems window and also 
 									// display a line in the Log
 									AddReceivedItem(player, item, 1);
-									
+
+									//== Y|y: List the ammo we picked up for this weapon as well
+									if(Weapon(item) != None)
+									{
+										if(Weapon(item).PickupAmmoCount <= 0 && Weapon(item).Default.PickupAmmoCount > 0)
+											Weapon(item).PickupAmmoCount = 1;
+
+										if(Weapon(item).AmmoType != None && Weapon(item).AmmoName != Class'AmmoNone')
+										{
+											if(Weapon(item).AmmoType.Icon != Weapon(item).Icon && Weapon(item).AmmoType.Icon != None)
+												AddReceivedItem(player, Weapon(item).AmmoType, Weapon(item).PickupAmmoCount);
+											else //== For weapons like the shuriken we just add to the weapon pickup count
+												AddReceivedItem(player, Weapon(item), Weapon(item).PickupAmmoCount - 1);
+										}
+									}
+
 									P.ClientMessage(Item.PickupMessage @ Item.itemArticle @ Item.itemName, 'Pickup');
 									PlaySound(Item.PickupSound);
 								}

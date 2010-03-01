@@ -81,7 +81,8 @@ function Timer()
 	  TicksSinceLastHack += (Level.TimeSeconds - LastTickTime) * 10;
 	  LastTickTime = Level.TimeSeconds;
       //TicksSinceLastHack = TicksSinceLastHack + 1;
-      while (TicksSinceLastHack > TicksPerHack)
+      //== Y|y: only do this for as much hacking as one multitool can do
+      while (TicksSinceLastHack > TicksPerHack && numHacks > 0)
       {
          numHacks--;
          hackStrength -= 0.01;

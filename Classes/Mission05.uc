@@ -92,11 +92,16 @@ function FirstFrame()
 					if (item != None)
 					{
 						nextItem = item.Inventory;
+
+						//== Y|y: Turn off any charged pickups we were using and remove the associated HUD.  Per Lork on the OTP forums
+						if (item.IsA('ChargedPickup'))
+							ChargedPickup(item).ChargedPickupEnd(Player);
+
 						Player.DeleteInventory(item);
 
 						item.DropFrom(SP.Location);
 
-						// restore any ammo amounts for a weapon to default
+						// restore any ammo amounts for a weapon to default; Y|y: except for grenades
 						if (item.IsA('Weapon') && (Weapon(item).AmmoType != None) && !item.IsA('WeaponLAM') && !item.IsA('WeaponGasGrenade') && !item.IsA('WeaponEMPGrenade') && !item.IsA('WeaponNanoVirusGrenade))
 							Weapon(item).PickupAmmoCount = Weapon(item).Default.PickupAmmoCount;
 					}

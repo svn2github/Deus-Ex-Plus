@@ -29,43 +29,56 @@
  + No upper limit on the amount of skillpoints you can have, which can cause a crash
  + Some Mission Scripts require the exact name "Unconscious" to count properly
  + Pistol Downgrade trick
+ + Targeting aug uses BindName for display instead of Familiar/Unfamiliar Name
+ + Phones ring while playing "this phone doesn't work" noises
+ + Phones still ring when ringFreq variable is set to zero
+ + Phones do not properly support the variable which determines their ring sound
+ + Crossbow doesn't play the proper firing sound
+ + Targeting aug uses itemName for weapons/etc. instead of display name
+ + bTriggerOnceOnly doesn't work right for triggers (various infinite skillpoint loops)
+ + Aggressive Defense can "detonate" throwing knives, darts, and flamethrower fire
+ + Being captured by UNATCO while using a charged item causes glitches
+ + Silenced Assault Rifle doesn't make enough silenced shots
+ + Carried items are forcibly thrown at the start of a conversation (e.g. TNT to Gunther's face)
+ + Extra Soda/Candy textures are not used
+ + "Inventory Received" window doesn't combine two instances of the same item
+ + "Inventory Received" window doesn't show proper counts for ammo given
+ + Conversation system doesn't support transfers from non-DeusEx classes
+ + Friendly bots at Vandenberg will kill the X-51 scientists if they're hit with friendly fire
+ + Throwing knife "ammo" has no icon for the items received window
+ + Infinite length (must be clicked to end) conversations are not supported
+ + AI Barks which fail to load sound or are set to zero length never end (OMG I CANT GET ON TEH BOTE)
 
- - "Hack/Pick/Multitool then pause" exploit
- - "Inventory Received" window doesn't combine two instances of the same item
- - Friendly bots at Vandenberg will kill the X-51 scientists if they're hit with friendly fire
- - Various NPCs are friendly instead of neutral (Lebedev, etc.)
- - Conversation system doesn't support transfers from non-DeusEx classes
+ / "Hack/Pick/Multitool then pause" exploit
+ / Various NPCs are friendly instead of neutral (Lebedev, etc.)
+
  - Cloaking is not nullified when you are on fire
  - Non-explosive projectiles don't break glass
  - Checking bodies for inventory can lead to an infinite loop, or somehow derail to your/another NPC's inventory
  - Logspam when NPCs weilding GEP Guns try to lock on to you
  - Various instances of logspam due to shoddy DX code
  - Shooting on the main dock before Alex's message makes Paul hate you
- - Throwing knife "ammo" has no icon for the items received window
+ - Paul can hate you during the 'Ton raid
+ - If your inventory is full Ford Shick will never give you the Aug Upgrade
 
- ? Aggressive Defense can "detonate" throwing knives, darts, and flamethrower fire
  ? Paul can be tricked into using lethal weapons against the NSF
  ? Ammo you haven't picked up is displayed in the weapon info screen
  ? Bullet tracers move very slow
  ? Overlap inventory exploit
- ? bTriggerOnceOnly doesn't work right for triggers (various infinite skillpoint loops)
  ? Patrol and teleport MissionScript functions do nothing
- ? Silenced Assault Rifle doesn't make enough silenced shots
  ? Unarmed NPCs can plow through obstacles (A.K.A. "Nicolette the Tank")
- ? "Inventory Received" window doesn't show proper counts for ammo given
  ? NPCs magically stop burning when they die
  ? Bullet spread is weird and inconsistent
- ? No price and product display on Vending Machines
- ? Carried items are forcibly thrown at the start of a conversation (e.g. TNT to Gunther's face)
- ? NPCs know your exact position when you are cloaked
- ? Extra Soda/Candy textures are not used
+ ? NPCs know your exact position when you are cloaked and silent
  ? Conversations with animal speakers attempt to invoke nonexistant animations
  ? There are two additional unused sounds for Rats
- ? Paul's answering machine (and the message it comes with) are not in the game
+ ? Paul's answering machine (and the message it comes with) is not in the game
  ? Unused VOIP conversation between Lebedev and the unknown party
- ? Phones do not properly support the variable which determines their ring sound
  ? Ammo pickup amounts from frobbed corpses is always 1-4, instead of based on the default pickup ammount
- ? OMG I CANT GET ON TEH BOTE
  ? Throwing Knives suck
- ? Spawned AugmentationCannisters have no augs in them
- ? Unconscious description doesn't include the name
+ ? Spawned AugmentationCannisters (using the summon cheat) have no augs in them
+ ? Unconscious NPC description doesn't include the name
+ ? Manderley's Safe is walled up
+ ? Hazmat suit doesn't protect against fire/electricity/etc. (description says it does)
+ ? You can't KO animals
+ ? Dead animals could easily say "Animal Carcass (Cat)" and so on

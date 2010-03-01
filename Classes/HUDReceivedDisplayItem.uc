@@ -53,7 +53,7 @@ event SetItem(Inventory invItem, int count)
 	winLabel.SetTextAlignments(HALIGN_Center, VALIGN_Top);
 
 	labelText = invItem.beltDescription;
-	if (count > 1)
+	if (count > 1 || invItem.IsA('Ammo')) //== Y|y for Ammo we ALWAYS want to list the amount
 		labelText = labelText $ " (" $ String(count) $ ")";
 
 	winLabel.SetText(labelText);

@@ -387,7 +387,8 @@ function Timer()
 	  TicksSinceLastPick += (Level.TimeSeconds - LastTickTime) * 10;
 	  LastTickTime = Level.TimeSeconds;
       //TicksSinceLastPick = TicksSinceLastPick + 1;
-      while (TicksSinceLastPick > TicksPerPick)
+      //== Y|y: Don't pick more than one lockpick can do
+      while (TicksSinceLastPick > TicksPerPick && numPicks > 0)
       {
          numPicks--;
          lockStrength -= 0.01;

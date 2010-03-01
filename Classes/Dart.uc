@@ -19,6 +19,7 @@ defaultproperties
      bBlood=True
      bStickToWall=True
      DamageType=shot
+     SpawnSound=Sound'DeusExSounds.Weapons.MiniCrossbowFire'
      spawnAmmoClass=Class'DeusEx.AmmoDart'
      bIgnoresNanoDefense=True
      ItemName="Dart"

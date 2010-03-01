@@ -21,6 +21,10 @@ function Trigger(Actor Other, Pawn Instigator)
 	{
 		player.SkillPointsAdd(skillPointsAdded);
 		player.ClientMessage(awardMessage);
+
+		//== Y|y: we need to ACTUALLY pay attention to the bTriggerOnceOnly variable
+		if(bTriggerOnceOnly)
+			Tag = '';
 	}
 }
 

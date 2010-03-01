@@ -35,6 +35,18 @@ function FirstFrame()
 				if (pawn.IsA('Jock') || pawn.IsA('TracerTong'))
 					pawn.EnterWorld();
 		}
+
+		//== Y|y: The x51 scientists have a habit of hitting their own bots with stray shotgun blasts
+		if (!flags.GetBool('No_Bot_Friendly_Fire'))
+		{
+			foreach AllActors(class'Robot', bot)
+			{
+				if(bot.Alliance == 'Bots_Salvagers')
+					bot.ChangeAlly('x51', 1, True, False);
+			}
+
+			flags.SetBool('No_Bot_Friendly_Fire', True);
+		}
 	}
 	else if (localURL == "12_VANDENBERG_GAS")
 	{

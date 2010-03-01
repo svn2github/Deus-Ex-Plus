@@ -1046,7 +1046,7 @@ function DrawTargetAugmentation(GC gc)
 
 				// print the name of the target above the box
 				if (target.IsA('Pawn'))
-					str = target.BindName;
+					str = target.FamiliarName; //target.BindName;
 				else if (target.IsA('DeusExDecoration'))
 					str = DeusExDecoration(target).itemName;
 				else if (target.IsA('DeusExProjectile'))
@@ -1140,7 +1140,13 @@ function DrawTargetAugmentation(GC gc)
 						str = msgWeapon;
 	
 						if (Pawn(target).Weapon != None)
-							str = str @ target.GetItemName(String(Pawn(target).Weapon.Class));
+						{
+							//== Y|y: Display the proper weapon name.  Per Lork on the OTP forums
+							if(Pawn(target).Weapon.ItemName == class'DeusExWeapon'.Default.ItemName) //Justice: If the weapon has a name...
+								str = str @ target.GetItemName(String(Pawn(target).Weapon.Class));
+							else
+								str = str @ Pawn(target).Weapon.ItemName; //Justice: ...Use it
+						}
 						else
 							str = str @ msgNone;
 
