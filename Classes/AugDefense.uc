@@ -34,12 +34,12 @@ state Active
 
 		minproj = None;
 
-      // DEUS_EX AMSD Multiplayer check
-      if (Player == None)
-      {
-         SetTimer(0.1,False);
-         return;
-      }
+		// DEUS_EX AMSD Multiplayer check
+		if (Player == None)
+		{
+		 SetTimer(0.1,False);
+		 return;
+		}
 
 		// In multiplayer propagate a sound that will let others know their in an aggressive defense field
 		// with range slightly greater than the current level value of the aug
@@ -49,39 +49,39 @@ state Active
 			defenseSoundTime = Level.Timeseconds + defenseSoundDelay;
 		}
 
-      //DEUS_EX AMSD Exported to function call for duplication in multiplayer.
-      minproj = FindNearestProjectile();
+		//DEUS_EX AMSD Exported to function call for duplication in multiplayer.
+		minproj = FindNearestProjectile();
 
 		// if we have a valid projectile, send it to the aug display window
 		if (minproj != None)
 		{
-         bDefenseActive = True;
-         mindist = VSize(Player.Location - minproj.Location);
-
-         // DEUS_EX AMSD In multiplayer, let the client turn his HUD on here.
-         // In singleplayer, turn it on normally.
-         if (Level.Netmode != NM_Standalone)
-            TriggerDefenseAugHUD();
-         else
-         {         
-            SetDefenseAugStatus(True,CurrentLevel,minproj);
-         }
+			 bDefenseActive = True;
+			 mindist = VSize(Player.Location - minproj.Location);
+			
+			 // DEUS_EX AMSD In multiplayer, let the client turn his HUD on here.
+			 // In singleplayer, turn it on normally.
+			 if (Level.Netmode != NM_Standalone)
+			    TriggerDefenseAugHUD();
+			 else
+			 {         
+			    SetDefenseAugStatus(True,CurrentLevel,minproj);
+			 }
 
 			// play a warning sound
 			Player.PlaySound(sound'GEPGunLock', SLOT_None,,,, 2.0);
 
 			if (mindist < LevelValues[CurrentLevel])
 			{
-            minproj.bAggressiveExploded=True;
+            			minproj.bAggressiveExploded=True;
 				minproj.Explode(minproj.Location, vect(0,0,1));
 				Player.PlaySound(sound'ProdFire', SLOT_None,,,, 2.0);
 			}
 		}
 		else
 		{
-         if ((Level.NetMode == NM_Standalone) || (bDefenseActive))
-            SetDefenseAugStatus(False,CurrentLevel,None);
-         bDefenseActive = false;
+			if ((Level.NetMode == NM_Standalone) || (bDefenseActive))
+				SetDefenseAugStatus(False,CurrentLevel,None);
+			bDefenseActive = false;
 		}
 	}
 
@@ -115,8 +115,9 @@ simulated function DeusExProjectile FindNearestProjectile()
    {
 
 	//== Y|y: Don't overcomplicate things.  The bIgnoresNanoDefense variable does a fine and dandy job in singleplayer too
+	//==  We also should ignore placed grenades, indicated by the bStuck variable
 //      if (Level.NetMode != NM_Standalone)
-         bValidProj = !proj.bIgnoresNanoDefense;
+         bValidProj = !proj.bIgnoresNanoDefense && !proj.bStuck;
 //      else
 //         bValidProj = (!proj.IsA('Cloud') && !proj.IsA('Tracer') && !proj.IsA('GreaselSpit') && !proj.IsA('GraySpit'));
 

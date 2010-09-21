@@ -48,6 +48,11 @@
  + Throwing knife "ammo" has no icon for the items received window
  + Infinite length (must be clicked to end) conversations are not supported
  + AI Barks which fail to load sound or are set to zero length never end (OMG I CANT GET ON TEH BOTE)
+ + Targeting aug will show "Default this ia bug" name for some kinds of non-interactive decorations (burnt cars, etc.)
+ + Ricochets don't play due to some weird engine bug
+ + Players can build up standing aim improvement "credit" and move with perfect aim
+ + Grenades no longer cause screen flashes if they aren't owned by the player
+ + Placed grenades won't set of the Aggressive Defense aug
 
  / "Hack/Pick/Multitool then pause" exploit
  / Various NPCs are friendly instead of neutral (Lebedev, etc.)
@@ -60,6 +65,7 @@
  - Shooting on the main dock before Alex's message makes Paul hate you
  - Paul can hate you during the 'Ton raid
  - If your inventory is full Ford Shick will never give you the Aug Upgrade
+ - If you have multiple chargedpickups active at the same time and one of them runs out, its icon isn't cleared properly from the HUD.
 
  ? Paul can be tricked into using lethal weapons against the NSF
  ? Ammo you haven't picked up is displayed in the weapon info screen

@@ -31,9 +31,10 @@ simulated function PlayHitSound(actor destActor, Actor hitActor)
 	local float rnd;
 	local sound snd;
 
+	//== Y|y: redundant, since this class is only invoked for bullets.  Kudos to Lork for finding this
 	// don't ricochet unless it's hit by a bullet
-	if ((damageType != 'Shot') && (damageType != 'Sabot'))
-		return;
+	//if ((damageType != 'Shot') && (damageType != 'Sabot'))
+	//	return;
 
 	rnd = FRand();
 

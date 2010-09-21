@@ -1048,7 +1048,10 @@ function DrawTargetAugmentation(GC gc)
 				if (target.IsA('Pawn'))
 					str = target.FamiliarName; //target.BindName;
 				else if (target.IsA('DeusExDecoration'))
-					str = DeusExDecoration(target).itemName;
+				{
+					if(DeusExDecoration(target).bHighlight)
+						str = DeusExDecoration(target).itemName;
+				}
 				else if (target.IsA('DeusExProjectile'))
 					str = DeusExProjectile(target).itemName;
 				else

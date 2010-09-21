@@ -48,7 +48,7 @@ function Tick(float deltaTime)
 //== Y|y: play the proper firing noise instead of the stealth pistol's firing sound.  Per Lork on the OTP forums
 simulated function PlayFiringSound()
 {
-   PlaySimSound( FireSound, SLOT_None, TransientSoundVolume, 2048 );
+   //PlaySimSound( FireSound, SLOT_None, TransientSoundVolume, 2048 );
 }
 
 defaultproperties
