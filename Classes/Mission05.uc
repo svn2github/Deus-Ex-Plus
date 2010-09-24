@@ -17,6 +17,7 @@ function FirstFrame()
 	local Inventory item, nextItem;
 	local SpawnPoint SP;
 	local AnnaNavarre Anna;
+	local DataCube dCube;
 
 	Super.FirstFrame();
 
@@ -102,7 +103,7 @@ function FirstFrame()
 						item.DropFrom(SP.Location);
 
 						// restore any ammo amounts for a weapon to default; Y|y: except for grenades
-						if (item.IsA('Weapon') && (Weapon(item).AmmoType != None) && !item.IsA('WeaponLAM') && !item.IsA('WeaponGasGrenade') && !item.IsA('WeaponEMPGrenade') && !item.IsA('WeaponNanoVirusGrenade))
+						if (item.IsA('Weapon') && (Weapon(item).AmmoType != None) && !item.IsA('WeaponLAM') && !item.IsA('WeaponGasGrenade') && !item.IsA('WeaponEMPGrenade') && !item.IsA('WeaponNanoVirusGrenade'))
 							Weapon(item).PickupAmmoCount = Weapon(item).Default.PickupAmmoCount;
 					}
 					

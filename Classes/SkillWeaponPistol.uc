@@ -13,6 +13,8 @@ var float mpLevel3;
 
 simulated function PreBeginPlay()
 {
+	local DeusExLevelInfo info;
+	
 	Super.PreBeginPlay();
 
 	//== Y|y: we only want to bump this up to Trained when starting a new game

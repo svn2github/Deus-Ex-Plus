@@ -69,6 +69,8 @@ function Timer()
 	local ThugMale Thug;
 	local BlackHelicopter chopper;
 	local int count;
+	local name tname, songname;
+	local FordSchick Ford;
 
 	Super.Timer();
 

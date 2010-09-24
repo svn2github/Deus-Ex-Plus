@@ -12,6 +12,7 @@ class Mission02 expands MissionScript;
 function FirstFrame()
 {
 	local ScriptedPawn pawn;
+	local FlagTrigger ftrig;
 
 	Super.FirstFrame();
 
@@ -116,6 +117,10 @@ function FirstFrame()
 
 function PreTravel()
 {
+	local MJ12Troop mj12;
+	local int count;
+	local FordSchick ford;
+	
 	if (localURL == "02_NYC_BATTERYPARK")
 	{
 		// if you leave without finishing, set some flags and remove the terrorists

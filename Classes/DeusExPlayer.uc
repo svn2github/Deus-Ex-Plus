@@ -602,7 +602,8 @@ event TravelPostAccept()
 	local MissionScript scr;
 	local bool bScriptRunning;
 	local InterpolationPoint I;
-
+	local string misstr;
+	
 	Super.TravelPostAccept();
 
 	// reset the keyboard

@@ -11,6 +11,9 @@ var TextWindow winLabel;
 var Color colText;
 var Font fontLabel;
 
+var Class<Inventory> itemClass; //The class of the item we're displaying
+var int itemCount; //The number of items we're tracking
+
 // ----------------------------------------------------------------------
 // InitWindow()
 //

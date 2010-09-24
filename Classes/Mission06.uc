@@ -26,6 +26,7 @@ function FirstFrame()
 	local AllianceTrigger altrig;
 	local MJ12Troop mjtroop;
 	local Mover thecase;
+	local FlagTrigger ftrig;
 
 	Super.FirstFrame();
 

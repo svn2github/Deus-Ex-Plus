@@ -9,7 +9,7 @@ enum ESkinColor
 	SC_Random,
 	SC_Honey,
 	SC_Monty
-}
+};
 
 var() ESkinColor SkinColor;
 

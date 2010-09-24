@@ -187,6 +187,7 @@ function Timer()
 	local Actor A;
 	local PaulDenton Paul;
 	local int count;
+	local FordSchick Ford;
 
 	Super.Timer();
 
