@@ -53,6 +53,8 @@
  + Players can build up standing aim improvement "credit" and move with perfect aim
  + Grenades no longer cause screen flashes if they aren't owned by the player
  + Placed grenades won't set of the Aggressive Defense aug
+ + You can reload your weapon when you shouldn't be able to (Lork)
+ + Missing "Armor ricochet" sound when shooting bots, cameras, turrets etc. (Lork)
 
  / "Hack/Pick/Multitool then pause" exploit
  / Various NPCs are friendly instead of neutral (Lebedev, etc.)

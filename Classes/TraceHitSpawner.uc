@@ -54,6 +54,11 @@ simulated function PlayHitSound(actor destActor, Actor hitActor)
 			snd = sound'ArmorRicochet';
 		else if (hitActor.IsA('Robot'))
 			snd = sound'ArmorRicochet';
+		else //Lork: Prevents sparks and ricochet sounds on normal decorations
+		{
+			snd = None;
+			destActor.bHidden = True;
+		}
 	}
 	if (destActor != None)
 		destActor.PlaySound(snd, SLOT_None,,, 1024, 1.1 - 0.2*FRand());

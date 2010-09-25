@@ -463,7 +463,7 @@ function ReloadAmmo()
 		return;
 	}
 
-	if (!IsInState('Reload'))
+	if (!IsInState('Reload') && CanReload()) //Lork: Prevents you from reloading if you shouldn't be able to
 	{
 		TweenAnim('Still', 0.1);
 		GotoState('Reload');
@@ -2524,7 +2524,7 @@ simulated function ProcessTraceHit(Actor Other, Vector HitLocation, Vector HitNo
 		{
 			if ( Role == ROLE_Authority )
 				Other.TakeDamage(HitDamage * mult, Pawn(Owner), HitLocation, 1000.0*X, damageType);
-			if (bHandToHand)
+			//if (bHandToHand) //Lork: Enable spawn effects for ranged weapons so we can hear the missing armor ricochet sound
 				SelectiveSpawnEffects( HitLocation, HitNormal, Other, HitDamage * mult);
 
 			if (bPenetrating && Other.IsA('Pawn') && !Other.IsA('Robot'))
