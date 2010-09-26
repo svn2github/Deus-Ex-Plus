@@ -470,6 +470,23 @@ function ReloadAmmo()
 	}
 }
 
+//Lork: Reload function intended for changing to different ammo types
+function ReloadNewAmmo()
+{
+	// single use or hand to hand weapon if ReloadCount == 0
+	if (ReloadCount == 0)
+	{
+		Pawn(Owner).ClientMessage(msgCannotBeReloaded);
+		return;
+	}
+
+	if (!IsInState('Reload'))
+	{
+		TweenAnim('Still', 0.1);
+		GotoState('Reload');
+	}
+}
+
 //
 // Note we need to control what's calling this...but I'll get rid of the access nones for now
 //
@@ -689,7 +706,7 @@ function bool LoadAmmo(int ammoNum)
 			if (DeusExPlayer(P) != None)
 				DeusExPlayer(P).UpdateBeltText(Self);
 
-			ReloadAmmo();
+			ReloadNewAmmo(); //Lork: Use the 'old' function so the reload animation will still play
 
 			P.ClientMessage(Sprintf(msgNowHas, ItemName, newAmmoClass.Default.ItemName));
 			return True;
