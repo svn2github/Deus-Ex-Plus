@@ -188,7 +188,6 @@ function Timer()
 	local PaulDenton Paul;
 	local FordSchick Ford;
 	local int count;
-	local FordSchick Ford;
 
 	Super.Timer();
 

@@ -44,11 +44,21 @@ event InitWindow()
 event SetItem(Inventory invItem, int count)
 {
 	local String labelText;
+	local Texture icontex;
 
 	winIcon = NewChild(Class'Window');
 	winIcon.SetSize(42, 37);
 	winIcon.SetBackgroundStyle(DSTY_Masked);
-	winIcon.SetBackground(invItem.Icon);
+
+	icontex = invItem.Icon;
+
+	if(icontex == None)
+		icontex = invItem.Default.Icon;
+
+	winIcon.SetBackground(icontex);
+
+	itemClass = invItem.Class; //For tracking duplicates
+	itemCount = count;
 
 	winLabel = TextWindow(NewChild(Class'TextWindow'));
 	winLabel.SetFont(fontLabel);
@@ -56,6 +66,8 @@ event SetItem(Inventory invItem, int count)
 	winLabel.SetTextAlignments(HALIGN_Center, VALIGN_Top);
 
 	labelText = invItem.beltDescription;
+	if(labelText == "") //== Weird bug with robots, no idea why
+		labelText = invItem.Default.beltDescription;
 	if (count > 1 || invItem.IsA('Ammo')) //== Y|y for Ammo we ALWAYS want to list the amount
 		labelText = labelText $ " (" $ String(count) $ ")";
 
