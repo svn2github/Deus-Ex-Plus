@@ -40,6 +40,15 @@ var localized string itemName;			// human readable name
 var() bool bInvincible;
 var bool bAnimalCarcass;
 
+//Lork: Stuff we need to know in order to kill unconscious people
+var string deadName; 
+var bool wasFemale;
+var String flagName;
+var bool wasImportant;
+
+var bool underwater;
+var float drownTimer;
+
 // ----------------------------------------------------------------------
 // InitFor()
 // ----------------------------------------------------------------------
@@ -52,7 +61,13 @@ function InitFor(Actor Other)
 		if (!bAnimalCarcass)
 		{
 			if (bNotDead)
+			{
+				deadName = itemName $ " (" $ ScriptedPawn(Other).FamiliarName $ ")"; //Lork: Save these for later
+				wasFemale = ScriptedPawn(Other).bIsFemale;	
+				wasImportant = ScriptedPawn(Other).bImportant;
+				flagName = Other.BindName;
 				itemName = msgNotDead;
+			}
 			else if (Other.IsA('ScriptedPawn'))
 				itemName = itemName $ " (" $ ScriptedPawn(Other).FamiliarName $ ")";
 		}
@@ -161,6 +176,8 @@ function ZoneChange(ZoneInfo NewZone)
 	// use the correct mesh for water
 	if (NewZone.bWaterZone)
 		Mesh = Mesh3;
+		
+	underwater = NewZone.bWaterZone; //Lork: keep track of whether you're underwater or not
 }
 
 // ----------------------------------------------------------------------
@@ -190,6 +207,19 @@ function Tick(float deltaSeconds)
 		if (bEmitCarcass)
 			AIStartEvent('Carcass', EAITYPE_Visual);
 	}
+	
+	//Lork: Unconscious people can drown too
+	if(underwater && bNotDead)
+	{
+		if(drownTimer <= 0)
+		{
+			TakeDamage(5, None, Location, vect(0,0,0), 'Drowned');
+			drownTimer = 2.0;
+		}
+		else
+			drownTimer -= deltaSeconds;
+	}
+	
 	Super.Tick(deltaSeconds);
 }
 
@@ -255,7 +285,7 @@ function TakeDamage(int Damage, Pawn instigatedBy, Vector hitLocation, Vector mo
 
 	// only take "gib" damage from these damage types
 	if ((damageType == 'Shot') || (damageType == 'Sabot') || (damageType == 'Exploded') || (damageType == 'Munch') ||
-	    (damageType == 'Tantalus'))
+	    (damageType == 'Tantalus') || (damageType == 'Shell') || (damageType == 'Fell')) //Lork: Falling can gib you too!
 	{
 		if ((damageType != 'Munch') && (damageType != 'Tantalus'))
 		{
@@ -284,11 +314,55 @@ function TakeDamage(int Damage, Pawn instigatedBy, Vector hitLocation, Vector mo
 			Damage *= 0.4;
 		CumulativeDamage += Damage;
 		if (CumulativeDamage >= MaxDamage)
+		{
+			if(bNotDead) //Lork: Gibbing is no excuse for pretending you're alive!
+				setDeathFlags(InstigatedBy);
+				
 			ChunkUp(Damage);
+		}
 		if (bDecorative)
 			Velocity = vect(0,0,0);
 	}
 
+	if(bNotDead)
+	{
+		//Lork: Only apply these damage types if the "corpse" is alive
+		if(damageType == 'Drowned' || damageType == 'Radiation' || damageType == 'Burned' || damageType == 'Flamed' || damageType == 'PoisonGas' || damageType == 'HalonGas')
+			CumulativeDamage += Damage;
+		
+		//Lork: Make it possible for unconscious NPCs to die
+		if(!bAnimalCarcass && (damageType == 'Shot' || damageType == 'Sabot' || damageType == 'Exploded' || damageType == 'Munch' ||
+		damageType == 'Tantalus' || damageType == 'Shell' || damageType == 'Fell' || damageType == 'Drowned' || damageType == 'Flamed' ||
+		damageType == 'Burned' || damageType == 'Radiation' || damageType == 'PoisonGas' || damageType == 'HalonGas'))
+		{
+			if(CumulativeDamage * 10 >= MaxDamage)
+			{
+				bNotDead = False;
+				itemName = deadName;
+				FamiliarName = itemName;
+			
+				if (Region.Zone.bWaterZone)
+				{
+					if(wasFemale)
+						PlaySound(sound'FemaleWaterDeath', SLOT_Pain,,,, 1.1 - 0.2*FRand());
+					else
+						PlaySound(sound'MaleWaterDeath', SLOT_Pain,,,, 1.1 - 0.2*FRand());
+				}
+				else
+				{
+					if(wasFemale)
+						PlaySound(sound'FemaleDeath', SLOT_Pain,,,, 1.1 - 0.2*FRand());
+					else
+						PlaySound(sound'MaleDeath', SLOT_Pain,,,, 1.1 - 0.2*FRand());
+				}
+				
+				AISendEvent('LoudNoise', EAITYPE_Audio);
+				
+				setDeathFlags(InstigatedBy);
+			}
+		}
+	}
+	
 	SetScaleGlow();
 }
 
@@ -362,6 +436,13 @@ function Frob(Actor Frobber, Inventory frobWith)
 					corpse.MaxDamage = MaxDamage;
 					corpse.CorpseItemName = itemName;
 					corpse.CarcassName = CarcassName;
+					
+					//Lork: Keep track of the unconscious vars as well
+					corpse.deadName = deadName;
+					corpse.wasFemale = wasFemale;
+					corpse.wasImportant = wasImportant;
+					corpse.flagName = flagName;
+					
 					corpse.Frob(player, None);
 					corpse.SetBase(player);
 					player.PutInHand(corpse);
@@ -840,6 +921,34 @@ Begin:
 	HandleLanding();
 }
 
+//Lork: Set the death flags properly if the carcass goes from unconscious to dead
+function setDeathFlags(Pawn InstigatedBy)
+{
+	local DeusExPlayer player;
+	local name deathFlag;
+	
+	player = DeusExPlayer(getPlayerPawn());
+	
+	if(wasImportant)
+	{
+		deathFlag = player.rootWindow.StringToName(flagName$"_Dead");
+		player.flagBase.SetBool(deathFlag, True);
+		player.flagBase.SetExpiration(deathFlag, FLAG_Bool, 0);
+		deathFlag = player.rootWindow.StringToName(flagName$"_Unconscious");
+		player.flagBase.SetBool(deathFlag, False);
+		player.flagBase.SetExpiration(deathFlag, FLAG_Bool, 0);
+	}
+}
+
+//Lork: Corpses take falling damage
+function Landed(vector HitNormal)
+{
+	super.Landed(HitNormal);
+	
+	if (Velocity.Z < -700)
+		TakeDamage(-0.14 * (Velocity.Z + 700), None, Location, Velocity, 'fell');
+}
+
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 
@@ -862,4 +971,6 @@ defaultproperties
      Buoyancy=170.000000
      BindName="DeadBody"
      bVisionImportant=True
+	 drownTimer=2.0
+	 underwater=False
 }

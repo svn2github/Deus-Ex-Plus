@@ -6062,6 +6062,13 @@ exec function bool DropItem(optional Inventory inv, optional bool bDrop)
 							carc.MaxDamage = POVCorpse(item).MaxDamage;
 							carc.itemName = POVCorpse(item).CorpseItemName;
 							carc.CarcassName = POVCorpse(item).CarcassName;
+							
+							//Lork: Save the new unconscious vars too
+							carc.deadName = POVCorpse(item).deadName;
+							carc.wasFemale = POVCorpse(item).wasFemale;
+							carc.wasImportant = POVCorpse(item).wasImportant;
+							carc.flagName = POVCorpse(item).flagName;
+							
 							carc.Velocity = item.Velocity * 0.5;
 							item.Velocity = vect(0,0,0);
 							carc.bHidden = False;
@@ -9835,16 +9842,22 @@ function bool DXReduceDamage(int Damage, name damageType, vector hitLocation, ou
 		// go through the actor list looking for owned HazMatSuits
 		// since they aren't in the inventory anymore after they are used
 
-
       //foreach AllActors(class'HazMatSuit', suit)
 //			if ((suit.Owner == Self) && suit.bActive)
-      if (UsingChargedPickup(class'HazMatSuit'))
-			{
-				skillLevel = SkillSystem.GetSkillLevelValue(class'SkillEnviro');
-				newDamage *= 0.75 * skillLevel;
-			}
 	}
-
+	
+	//Lork: The hazmat suit needs to be split off into its own block of code to do its job properly
+	if ((damageType == 'TearGas') || (damageType == 'PoisonGas') || (damageType == 'Radiation') ||
+		(damageType == 'HalonGas')  || (damageType == 'PoisonEffect') || (damageType == 'Poison') ||
+		(damageType == 'Flamed') || (damageType == 'EMP') || (damageType == 'Shocked')) //Damage types that it was supposed to protect you from, but didn't
+	{
+		if (UsingChargedPickup(class'HazMatSuit'))
+		{
+			skillLevel = SkillSystem.GetSkillLevelValue(class'SkillEnviro');
+			newDamage *= 0.75 * skillLevel;
+		}
+	}
+		
 	if ((damageType == 'Shot') || (damageType == 'Sabot') || (damageType == 'Exploded') || (damageType == 'AutoShot'))
 	{
 		// go through the actor list looking for owned BallisticArmor

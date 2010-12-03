@@ -14,6 +14,12 @@ var travel int    MaxDamage;
 var travel string CorpseItemName;
 var travel Name   CarcassName;
 
+//Lork: Unconscious vars
+var travel string deadName; 
+var travel bool wasFemale;
+var travel String flagName;
+var travel bool wasImportant;
+
 defaultproperties
 {
      MaxDamage=10

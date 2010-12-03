@@ -55,6 +55,10 @@
  + Placed grenades won't set of the Aggressive Defense aug
  + You can reload your weapon when you shouldn't be able to (Lork)
  + Missing "Armor ricochet" sound when shooting bots, cameras, turrets etc. (Lork)
+ + Hazmat suit doesn't protect against fire/electricity/etc. (description says it does) (Lork)
+ + NPCs don't make use of all of the available pain sounds (Lork)
+ + Unconscious NPCs can't be killed (Lork)
+ + The game lacks an autosave (Lork)
 
  / "Hack/Pick/Multitool then pause" exploit
  / Various NPCs are friendly instead of neutral (Lebedev, etc.)
@@ -87,6 +91,5 @@
  ? Spawned AugmentationCannisters (using the summon cheat) have no augs in them
  ? Unconscious NPC description doesn't include the name
  ? Manderley's Safe is walled up
- ? Hazmat suit doesn't protect against fire/electricity/etc. (description says it does)
  ? You can't KO animals
  ? Dead animals could easily say "Animal Carcass (Cat)" and so on

@@ -3636,9 +3636,20 @@ function Gasp()
 // ----------------------------------------------------------------------
 
 function PlayDyingSound()
-{
+{	
 	SetDistressTimer();
-	PlaySound(Die, SLOT_Pain,,,, RandomPitch());
+	
+	//Lork: Play the water death sound if appropriate
+	if((die == sound'MaleDeath' || die == sound'FemaleDeath') && Region.Zone.bWaterZone)
+	{
+		if(bIsFemale)
+			PlaySound(sound'FemaleWaterDeath', SLOT_Pain,,,, RandomPitch());
+		else
+			PlaySound(sound'MaleWaterDeath', SLOT_Pain,,,, RandomPitch());
+	}
+	else
+		PlaySound(Die, SLOT_Pain,,,, RandomPitch());
+		
 	AISendEvent('LoudNoise', EAITYPE_Audio);
 	if (bEmitDistress)
 		AISendEvent('Distress', EAITYPE_Audio);
@@ -3947,10 +3958,37 @@ function PlayTakeHitSound(int Damage, name damageType, int Mult)
 
 	LastPainSound = Level.TimeSeconds;
 
-	if (Damage <= 30)
-		hitSound = HitSound1;
-	else
-		hitSound = HitSound2;
+	//Lork: Use extra pain sounds if appropriate
+	if(hitSound1 == sound'MalePainSmall' || hitSound1 == sound'FemalePainSmall')
+	{
+		if(Region.Zone.bWaterZone && damageType == 'Drowned')
+		{
+			if(bIsFemale)
+				hitSound = sound'FemaleDrown';
+			else
+				hitSound = sound'MaleDrown';
+		}
+		else if(damageType == 'PoisonGas')
+		{
+			if(!bIsFemale)
+				hitSound = sound'MaleCough';
+		}
+		else if(damage >= 60)
+		{
+			if(bIsFemale)
+				hitSound = sound'FemalePainLarge';
+			else
+				hitSound = sound'MalePainLarge';
+		}
+	}
+	
+	if(hitSound == None)
+	{
+		if (Damage <= 30)
+			hitSound = HitSound1;
+		else
+			hitSound = HitSound2;
+	}
 	volume = FMax(Mult*TransientSoundVolume, Mult*2.0);
 
 	SetDistressTimer();
