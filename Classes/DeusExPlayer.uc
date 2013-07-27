@@ -1242,19 +1242,22 @@ function ResetPlayerToDefaults()
 	if (KeyRing != None)
 	{
 		KeyRing.RemoveAllKeys();
-      if ((Role == ROLE_Authority) && (Level.NetMode != NM_Standalone))
-      {
-         KeyRing.ClientRemoveAllKeys();
-      }
+		if ((Role == ROLE_Authority) && (Level.NetMode != NM_Standalone))
+			KeyRing.ClientRemoveAllKeys();
 		KeyRing = None;
 	}
 
-	while(Inventory != None)
+	anItem = Inventory;
+
+	while(anItem != None)
 	{
-		anItem = Inventory;
+		nextItem = anItem.Inventory;
 		DeleteInventory(anItem);
 		anItem.Destroy();
+		anItem = nextItem;
 	}
+
+	Inventory = None;
 
 	// Clear object belt
 	if (DeusExRootWindow(rootWindow) != None)
@@ -1288,11 +1291,11 @@ function ResetPlayerToDefaults()
 	// Reinitialize all subsystems we've just nuked
 	InitializeSubSystems();
 
-   // Give starting inventory.
-   if (Level.Netmode != NM_Standalone)
+	// Give starting inventory.
+	if (Level.Netmode != NM_Standalone)
 	{
 		NintendoImmunityEffect( True );
-      GiveInitialInventory();
+		GiveInitialInventory();
 	}
 }
 

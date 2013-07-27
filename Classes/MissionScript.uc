@@ -126,6 +126,11 @@ function FirstFrame()
 		// Set this flag so we only get in here once per mission.
 		flags.SetBool(flagName, True);
 	}
+
+	//== Y|y: Move this here and set some additional restrictions so it carries over to mods and the like
+	if (dxInfo != None && !(player.IsInState('Dying')) && !(player.IsInState('Paralyzed')) && !(player.IsInState('Interpolating')) && 
+	player.dataLinkPlay == None && Level.Netmode == NM_Standalone && dxInfo.MissionNumber > 0 && dxInfo.MissionNumber < 98)
+		player.SaveGame(-3, "Auto Save"); //Lork: Autosave after loading a new map... this saves lives!
 }
 
 // ----------------------------------------------------------------------
@@ -164,6 +169,7 @@ function Timer()
 
 // ----------------------------------------------------------------------
 // GetPatrolPoint()
+// Y|y: Fixed to actually do something
 // ----------------------------------------------------------------------
 
 function PatrolPoint GetPatrolPoint(Name patrolTag, optional bool bRandom)
@@ -172,12 +178,18 @@ function PatrolPoint GetPatrolPoint(Name patrolTag, optional bool bRandom)
 
 	aPoint = None;
 
-	foreach AllActors(class'PatrolPoint', aPoint, patrolTag)
+	while(aPoint == None)
 	{
-		if (bRandom && (FRand() < 0.5))
-			break;
-		else
-			break;
+		foreach AllActors(class'PatrolPoint', aPoint, patrolTag)
+		{
+			if (bRandom)
+			{
+				if(FRand() < 0.5)
+					break;
+			}
+			else
+				break;
+		}
 	}
 
 	return aPoint;
@@ -185,6 +197,7 @@ function PatrolPoint GetPatrolPoint(Name patrolTag, optional bool bRandom)
 
 // ----------------------------------------------------------------------
 // GetSpawnPoint()
+// Y|y: Fixed to actually do something
 // ----------------------------------------------------------------------
 
 function SpawnPoint GetSpawnPoint(Name spawnTag, optional bool bRandom)
@@ -193,12 +206,18 @@ function SpawnPoint GetSpawnPoint(Name spawnTag, optional bool bRandom)
 
 	aPoint = None;
 
-	foreach AllActors(class'SpawnPoint', aPoint, spawnTag)
+	while(aPoint == None)
 	{
-		if (bRandom && (FRand() < 0.5))
-			break;
-		else
-			break;
+		foreach AllActors(class'SpawnPoint', aPoint, spawnTag)
+		{
+			if (bRandom)
+			{
+				if(FRand() < 0.5)
+					break;
+			}
+			else
+				break;
+		}
 	}
 
 	return aPoint;

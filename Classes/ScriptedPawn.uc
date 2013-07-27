@@ -3300,7 +3300,8 @@ function CheckOpenDoor(vector HitNormal, actor Door, optional name Label)
 	dxMover = DeusExMover(Door);
 	if (dxMover != None)
 	{
-		if (bCanOpenDoors && !IsDoor(dxMover) && dxMover.bBreakable)  // break glass we walk into
+		//== Y|y: Only allow this for NPCs who are carrying a weapon
+		if (bCanOpenDoors && !IsDoor(dxMover) && dxMover.bBreakable && Weapon != None)  // break glass we walk into
 		{
 			dxMover.TakeDamage(200, self, dxMover.Location, Velocity, 'Shot');
 			return;

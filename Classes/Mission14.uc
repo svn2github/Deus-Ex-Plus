@@ -17,10 +17,6 @@ function FirstFrame()
 	{
 		Player.GoalCompleted('StealSub');
 	}
-	
-	if (dxInfo != None && !(player.IsInState('Dying')) && !(player.IsInState('Paralyzed')) && !(player.IsInState('Interpolating')) && 
-	player.dataLinkPlay == None && Level.Netmode == NM_Standalone)
-		player.SaveGame(-3, "Auto Save"); //Lork: Autosave after loading a new map... this saves lives!
 }
 
 // ----------------------------------------------------------------------

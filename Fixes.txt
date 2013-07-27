@@ -59,6 +59,9 @@
  + NPCs don't make use of all of the available pain sounds (Lork)
  + Unconscious NPCs can't be killed (Lork)
  + The game lacks an autosave (Lork)
+ + Starting a new game does not clear your inventory properly
+ + Patrol and teleport MissionScript functions do nothing
+ + Unarmed NPCs can plow through obstacles (A.K.A. "Nicolette the Tank")
 
  / "Hack/Pick/Multitool then pause" exploit
  / Various NPCs are friendly instead of neutral (Lebedev, etc.)
@@ -77,8 +80,6 @@
  ? Ammo you haven't picked up is displayed in the weapon info screen
  ? Bullet tracers move very slow
  ? Overlap inventory exploit
- ? Patrol and teleport MissionScript functions do nothing
- ? Unarmed NPCs can plow through obstacles (A.K.A. "Nicolette the Tank")
  ? NPCs magically stop burning when they die
  ? Bullet spread is weird and inconsistent
  ? NPCs know your exact position when you are cloaked and silent
