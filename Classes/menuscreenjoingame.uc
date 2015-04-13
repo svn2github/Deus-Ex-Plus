@@ -927,7 +927,7 @@ defaultproperties
      HostButtonHelpText="Host a multiplayer game"
      JoinButtonHelpText="Join the currently selected game"
      RefreshButtonHelpText="Refresh the list of servers"
-     MasterServerAddress="master0.gamespy.com"
+     MasterServerAddress="master.deusexnetwork.com"
      MasterServerTCPPort=28900
      MasterServerTimeout=10
      GameName="deusex"
