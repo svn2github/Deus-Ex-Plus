@@ -58,7 +58,6 @@
  + Hazmat suit doesn't protect against fire/electricity/etc. (description says it does) (Lork)
  + NPCs don't make use of all of the available pain sounds (Lork)
  + Unconscious NPCs can't be killed (Lork)
- + The game lacks an autosave (Lork)
  + Starting a new game does not clear your inventory properly
  + Patrol and teleport MissionScript functions do nothing
  + Unarmed NPCs can plow through obstacles (A.K.A. "Nicolette the Tank")
@@ -94,3 +93,4 @@
  ? Manderley's Safe is walled up
  ? You can't KO animals
  ? Dead animals could easily say "Animal Carcass (Cat)" and so on
+ ? The game lacks an autosave (Lork) - Reverted due to implementation issues

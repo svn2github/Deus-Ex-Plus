@@ -126,11 +126,6 @@ function FirstFrame()
 		// Set this flag so we only get in here once per mission.
 		flags.SetBool(flagName, True);
 	}
-
-	//== Y|y: Move this here and set some additional restrictions so it carries over to mods and the like
-	if (dxInfo != None && !(player.IsInState('Dying')) && !(player.IsInState('Paralyzed')) && !(player.IsInState('Interpolating')) && 
-	player.dataLinkPlay == None && Level.Netmode == NM_Standalone && dxInfo.MissionNumber > 0 && dxInfo.MissionNumber < 98)
-		player.SaveGame(-3, "Auto Save"); //Lork: Autosave after loading a new map... this saves lives!
 }
 
 // ----------------------------------------------------------------------
